@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public bool debug_elf_eyes = false;
+    public Path initial_path;
 
     public GameObject landmarks_obj;
     public Text narration_text;
@@ -23,14 +24,13 @@ public class GameManager : MonoBehaviour
     private Path prev_player_path;
     private Landmark inspected_lm;
     private float path_timestamp = -999.0f;
+    private Landmark from_door;
     private Searcher<Landmark> landmark_searcher;
 
     private void Awake()
     {
         landmark_searcher = new Searcher<Landmark>(Landmark.Filter);
-        
-        Path[] paths = FindObjectsOfType<Path>();
-        player_path = paths[0];
+        player_path = initial_path ? initial_path : FindObjectsOfType<Path>()[0];
         SetupLandmarks();
     }
 
@@ -66,7 +66,9 @@ public class GameManager : MonoBehaviour
             player_path = inspected_lm.other_door.GetPath();
             path_timestamp = Time.timeSinceLevelLoad;
             inspected_lm.other_door.index = inspected_lm.index;
+            from_door = inspected_lm;
             inspected_lm = null;
+            landmark_searcher.Reset();
         }
 
         // Landmarks.
@@ -118,6 +120,9 @@ public class GameManager : MonoBehaviour
             int path_row = i - path_first_index;
 
             bool on_path = lm_path == player_path;
+            bool on_prev_path = from_door && lm_path == from_door.GetPath();
+            bool is_from_door = landmark == from_door;
+            bool is_to_door = from_door && landmark == from_door.other_door;
             float dif = landmark.position - player_position;
             float dist = Mathf.Abs(landmarks[i].position - player_position);
             bool is_visible = dist < landmarks[i].los && on_path;
@@ -154,7 +159,7 @@ public class GameManager : MonoBehaviour
             float on_path_opacity = landmark.los == 0 ? 0.0f : Mathf.Clamp01(1.0f - Mathf.Pow(dist / landmark.los, 2.0f));
             if (on_path)
             {
-                float t = landmark.is_door ? 
+                float t = is_to_door ? 
                     1.0f : // (Time.timeSinceLevelLoad - path_timestamp) * 2.0f:
                     (Time.timeSinceLevelLoad - path_timestamp) * 2.0f - 1.0f;
                 color.a = Mathf.Lerp(on_path_opacity - 1.0f, on_path_opacity, t);
@@ -163,12 +168,16 @@ public class GameManager : MonoBehaviour
                     color.a = 1.0f;
                 }
             }
-            else
+            else if (on_prev_path)
             {
-                float t = landmark.is_door ?
+                float t = is_from_door ?
                     1.0f : // (Time.timeSinceLevelLoad - path_timestamp) * 2.0f :
                     (Time.timeSinceLevelLoad - path_timestamp) * 2.0f;
                 color.a = Mathf.Lerp(on_path_opacity, on_path_opacity - 1.0f, t);
+            }
+            else
+            {
+                color.a = 0.0f;
             }
             text.color = color;
         }
@@ -176,6 +185,7 @@ public class GameManager : MonoBehaviour
         // Movement.
         float input_move = Input.GetAxis("Horizontal");
         player_position += input_move * speed * Time.deltaTime;
+        player_position = Mathf.Clamp(player_position, player_path.left_wall_pos, player_path.right_wall_pos);
 
         // Search.
         string input_search = Regex.Replace(Input.inputString, "[^A-Za-z0-9 -]", "");

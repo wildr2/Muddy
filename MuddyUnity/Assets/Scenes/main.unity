@@ -316,7 +316,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1073518481, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: -200
       objectReference: {fileID: 0}
     - target: {fileID: 1073518481, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -324,7 +324,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1073518481, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -100
       objectReference: {fileID: 0}
     - target: {fileID: 1363219376, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3, type: 3}
       propertyPath: m_SizeDelta.x
@@ -480,6 +480,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4350206300733184683, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3,
+        type: 3}
+      propertyPath: description
+      value: The ladder.
+      objectReference: {fileID: 0}
+    - target: {fileID: 6361317701531162904, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3,
+        type: 3}
+      propertyPath: description
+      value: Looks like it goes up to the attic.
+      objectReference: {fileID: 0}
     - target: {fileID: 7003303908526379335, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -499,6 +509,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8764170512762372400, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3,
+        type: 3}
+      propertyPath: description
+      value: A dusty wooden crate.
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5834e5ff6f0100e4390ee7e9ea5c54e3, type: 3}

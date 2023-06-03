@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
         Landmark left_lm = closest_lm_index - 1 >= 0 ? landmarks[closest_lm_index - 1] : null;
         Landmark right_lm = closest_lm_index + 1 < landmarks.Length ? landmarks[closest_lm_index + 1] : null;
 
-        Array.Sort(landmarks, new CompareLandmarkLOS());
+        Array.Sort(landmarks, new ReverseComparer(new CompareLandmarkEdgeofVisionPos(player_position, player_path, false)));
         Path path = null;
         int path_first_index = -1;
         for (int i = 0; i < landmarks.Length; ++i)
@@ -135,6 +135,7 @@ public class GameManager : MonoBehaviour
             {
                 is_inspected = false;
                 inspected_lm = null;
+                landmark_searcher.Reset();
             }
             landmark.inspect_indicator.gameObject.SetActive(is_inspected);
 

@@ -85,6 +85,37 @@ public class CompareLandmarkLOS : IComparer
     }
 }
 
+public class CompareLandmarkEdgeofVisionPos : IComparer
+{
+    float position;
+    Path path;
+    bool left_edge;
+
+    public CompareLandmarkEdgeofVisionPos(float position, Path path, bool left_edge)
+    {
+        this.position = position;
+        this.path = path;
+        this.left_edge = left_edge;
+    }
+
+    public int Compare(object x, object y)
+    {
+        Landmark lm1 = (Landmark)x;
+        Landmark lm2 = (Landmark)y;
+
+        Path path1 = lm1.GetPath();
+        Path path2 = lm2.GetPath();
+        if (path1 != path2)
+        {
+            return path1 == path ? -1 : path2 == path ? 1 : ((new CaseInsensitiveComparer()).Compare(path1.name, path2.name));
+        }
+
+        float pos1 = lm1.position + (lm1.los * (left_edge ? -1 : 1));
+        float pos2 = lm2.position + (lm2.los * (left_edge ? -1 : 1));
+        return ((new CaseInsensitiveComparer()).Compare(pos1, pos2));
+    }
+}
+
 public class CompareLanmarkDistFromEdgeOfVision : IComparer
 {
     float position;
@@ -100,13 +131,12 @@ public class CompareLanmarkDistFromEdgeOfVision : IComparer
     {
         Landmark lm1 = (Landmark)x;
         Landmark lm2 = (Landmark)y;
-        
-        Path p1 = lm1.transform.parent.GetComponent<Path>();
-        Path p2 = lm2.transform.parent.GetComponent<Path>();
-        int cmp = ((new CaseInsensitiveComparer()).Compare(p1.name, p2.name));
-        if (cmp != 0)
+
+        Path p1 = lm1.GetPath();
+        Path p2 = lm2.GetPath();
+        if (p1 != p2)
         {
-            return p1 == path ? -1 : p2 == path ? 1 : cmp;
+            return p1 == path ? -1 : p2 == path ? 1 : ((new CaseInsensitiveComparer()).Compare(p1.name, p2.name));
         }
 
         float d1 = Mathf.Abs(lm1.position - position) - lm1.los;
@@ -190,5 +220,20 @@ public class CompareLanmarkVisibility : IComparer
         float v1 = lm1.los == 0.0 ? 0.0f : 1.0f - Mathf.Abs(lm1.position - position) / lm1.los;
         float v2 = lm2.los == 0.0 ? 0.0f : 1.0f - Mathf.Abs(lm2.position - position) / lm2.los;
         return ((new CaseInsensitiveComparer()).Compare(v2, v1));
+    }
+}
+
+public class ReverseComparer : IComparer
+{
+    public IComparer comparer;
+
+    public ReverseComparer(IComparer comparer)
+    {
+        this.comparer = comparer;
+    }
+
+    public int Compare(object x, object y)
+    {
+        return comparer.Compare(y, x);
     }
 }

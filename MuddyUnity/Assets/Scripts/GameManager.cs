@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public bool debug_elf_eyes = false;
-    public Path initial_path;
+    public string initial_path;
 
     public GameObject landmarks_obj;
     public Text narration_text;
@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     public Color highlight_color = Color.red;
 
     public float player_position;
+    private bool teleporting;
     private Path player_path;
     private Path prev_player_path;
     private Landmark inspected_lm;
@@ -27,10 +28,14 @@ public class GameManager : MonoBehaviour
     private Landmark from_door;
     private Searcher<Landmark> landmark_searcher;
 
-    private void Awake()
+    private void Start()
     {
         landmark_searcher = new Searcher<Landmark>(Landmark.Filter);
-        player_path = initial_path ? initial_path : FindObjectsOfType<Path>()[0];
+
+        Path[] paths = FindObjectsOfType<Path>();
+        player_path = Array.Find(paths, (path) => path.name == initial_path);
+        player_path = player_path ? player_path : paths[0];
+
         SetupLandmarks();
     }
 
@@ -40,12 +45,12 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < landmarks.Length; ++i)
         {
             Landmark lm = landmarks[i];
-            if (lm.is_door)
+            if (lm.door_name != "")
             {
                 for (int j = i + 1; j < landmarks.Length; ++j)
                 {
                     Landmark lm2 = landmarks[j];
-                    if (lm.name == lm2.name)
+                    if (lm.door_name == lm2.door_name)
                     {
                         lm.other_door = lm2;
                         lm2.other_door = lm;
@@ -64,6 +69,8 @@ public class GameManager : MonoBehaviour
         {
             prev_player_path = player_path;
             player_path = inspected_lm.other_door.GetPath();
+            player_position = inspected_lm.other_door.position + (player_position - inspected_lm.position);
+            teleporting = true;
             path_timestamp = Time.timeSinceLevelLoad;
             inspected_lm.other_door.index = inspected_lm.index;
             from_door = inspected_lm;
@@ -152,14 +159,17 @@ public class GameManager : MonoBehaviour
             target_ui_pos.y = (landmarks.Length - 1 - landmark.index) * 35.0f;
              
             Vector3 ui_pos = rt.localPosition;
-            ui_pos.x = Mathf.Lerp(ui_pos.x, target_ui_pos.x, Time.deltaTime * landmark.x_lerp_speed);
-            ui_pos.y = on_path ? target_ui_pos.y : ui_pos.y; // Mathf.Lerp(ui_pos.y, target_ui_pos.y, Time.deltaTime * landmark.y_lerp_speed);
-            rt.localPosition = ui_pos;
-
-            Color color = text.color;
-            float on_path_opacity = landmark.los == 0 ? 0.0f : Mathf.Clamp01(1.0f - Mathf.Pow(dist / landmark.los, 2.0f));
             if (on_path)
             {
+                ui_pos.x = teleporting ? target_ui_pos.x : Mathf.Lerp(ui_pos.x, target_ui_pos.x, Time.deltaTime * landmark.x_lerp_speed);
+                ui_pos.y = on_path ? target_ui_pos.y : ui_pos.y; // Mathf.Lerp(ui_pos.y, target_ui_pos.y, Time.deltaTime * landmark.y_lerp_speed);
+                rt.localPosition = ui_pos;
+            }
+
+            Color color = text.color;
+            if (on_path)
+            {
+                float on_path_opacity = landmark.los == 0 ? 0.0f : Mathf.Clamp01(1.0f - Mathf.Pow(dist / landmark.los, 2.0f));
                 float t = is_to_door ? 
                     1.0f : // (Time.timeSinceLevelLoad - path_timestamp) * 2.0f:
                     (Time.timeSinceLevelLoad - path_timestamp) * 2.0f - 1.0f;
@@ -168,13 +178,14 @@ public class GameManager : MonoBehaviour
                 {
                     color.a = 1.0f;
                 }
+                landmark.last_on_path_opacity = color.a;
             }
             else if (on_prev_path)
             {
                 float t = is_from_door ?
                     1.0f : // (Time.timeSinceLevelLoad - path_timestamp) * 2.0f :
                     (Time.timeSinceLevelLoad - path_timestamp) * 2.0f;
-                color.a = Mathf.Lerp(on_path_opacity, on_path_opacity - 1.0f, t);
+                color.a = Mathf.Lerp(landmark.last_on_path_opacity, landmark.last_on_path_opacity - 1.0f, t);
             }
             else
             {
@@ -227,6 +238,8 @@ public class GameManager : MonoBehaviour
             narration_text.text = path_in_t > 0.0f ? player_path.description : prev_player_path ? prev_player_path.description : "";
             narration_text.color = Color.Lerp(Color.clear, Color.white, 0.75f * narration_opacity);
         }
+
+        teleporting = false;
     }
 
     public int get_next_available_landmark_index(Landmark[] visible_landmarks_by_index)

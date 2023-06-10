@@ -10,7 +10,7 @@ public class Path : MonoBehaviour
     public float left_wall_pos;
     public float right_wall_pos;
 
-    private void Awake()
+    private void Start()
     {
         DetermineWallPositions();
     }

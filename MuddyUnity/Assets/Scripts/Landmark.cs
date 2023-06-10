@@ -9,11 +9,12 @@ public class Landmark : MonoBehaviour
     public string description = "";
     public int position = 0;
     public int los = 10;
-    public bool is_door;
+    public string door_name;
     public float x_lerp_speed = 10.0f; 
     public float y_lerp_speed = 2.0f;
     public int index = -1;
     public Landmark other_door;
+    public float last_on_path_opacity;
 
     public Text inspect_indicator;
 

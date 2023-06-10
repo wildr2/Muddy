@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debug_elf_eyes: 0
+  initial_path: road
   landmarks_obj: {fileID: 0}
   narration_text: {fileID: 0}
   speed: 8
@@ -74,4 +75,4 @@ MonoBehaviour:
   max_ui_pos: 800
   max_dist: 80
   highlight_color: {r: 0.3915094, g: 0.71600026, b: 1, a: 1}
-  position: 0
+  player_position: 0

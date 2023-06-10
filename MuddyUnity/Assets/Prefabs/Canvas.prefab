@@ -143,11 +143,12 @@ MonoBehaviour:
   description: A simple red boat, seems skyworthy enough.
   position: 7
   los: 20
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &54557996
 MonoBehaviour:
@@ -261,11 +262,12 @@ MonoBehaviour:
   description: An oak tree.
   position: 10
   los: 40
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &87801721
 MonoBehaviour:
@@ -379,11 +381,12 @@ MonoBehaviour:
   description: The professor must have left his pack in the workshop.
   position: 0
   los: 10
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &205986606
 MonoBehaviour:
@@ -497,11 +500,12 @@ MonoBehaviour:
   description: A totem pole.
   position: 18
   los: 50
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &259844689
 MonoBehaviour:
@@ -615,11 +619,12 @@ MonoBehaviour:
   description: A small empty glass jar sits atop the workbench.
   position: -2
   los: 10
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &433287676
 MonoBehaviour:
@@ -812,11 +817,12 @@ MonoBehaviour:
   description: It's a sturdy wooden bench.
   position: -1
   los: 20
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &467633545
 MonoBehaviour:
@@ -1009,11 +1015,12 @@ MonoBehaviour:
   description: They're shut. Light creeps between them.
   position: 5
   los: 20
-  is_door: 1
+  door_name: bay_doors
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &542227333
 MonoBehaviour:
@@ -1206,11 +1213,12 @@ MonoBehaviour:
   description: A tree.
   position: 20
   los: 40
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &747453427
 MonoBehaviour:
@@ -1452,10 +1460,10 @@ RectTransform:
   m_Father: {fileID: 3230204160223609706}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -44.1}
-  m_SizeDelta: {x: 500, y: 411.8}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -100}
+  m_SizeDelta: {x: 0, y: -200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1073518482
 CanvasRenderer:
@@ -1687,11 +1695,12 @@ MonoBehaviour:
   description: An orange suculant.
   position: 16
   los: 20
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &1363219378
 MonoBehaviour:
@@ -2121,11 +2130,12 @@ MonoBehaviour:
   description: A crooked wooden barn.
   position: 4
   los: 40
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &2069475181
 MonoBehaviour:
@@ -2239,11 +2249,12 @@ MonoBehaviour:
   description: They're shut. Light creeps between them.
   position: 5
   los: 20
-  is_door: 1
+  door_name: bay_doors
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &2110014522
 MonoBehaviour:
@@ -2357,11 +2368,12 @@ MonoBehaviour:
   description: From a distance, the white tower of Schist peaks through distant clouds.
   position: 100
   los: 200
-  is_door: 0
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &6725760254933673450
 MonoBehaviour:
@@ -2458,6 +2470,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   description: Sunlight filters through the workshop's many grimy windows, dappling
     scattered wooden benches and overbearing spider plants.
+  left_wall_pos: 0
+  right_wall_pos: 0
 --- !u!1 &1561704177794915617
 GameObject:
   m_ObjectHideFlags: 0
@@ -2623,11 +2637,12 @@ MonoBehaviour:
   description: The ladder.
   position: 0
   los: 20
-  is_door: 1
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &7043289674984442179
 MonoBehaviour:
@@ -2887,6 +2902,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: It's hot and windy outside the workshop.
+  left_wall_pos: 0
+  right_wall_pos: 0
 --- !u!1 &3779447638574410932
 GameObject:
   m_ObjectHideFlags: 0
@@ -2948,14 +2965,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   name: crate
-  description: a crate.
+  description: A dusty wooden crate.
   position: -3
   los: 20
-  is_door: 1
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &6523465995290540081
 MonoBehaviour:
@@ -3135,6 +3153,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   description: Sunlight filters through the workshop's many grimy windows, dappling
     scattered wooden benches and overbearing spider plants.
+  left_wall_pos: 0
+  right_wall_pos: 0
 --- !u!1 &5965338748204170551
 GameObject:
   m_ObjectHideFlags: 0
@@ -3275,14 +3295,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   name: ladder
-  description: The ladder.
+  description: Looks like it goes up to the attic.
   position: 0
   los: 20
-  is_door: 1
+  door_name: 
   x_lerp_speed: 10
   y_lerp_speed: 4
   index: -1
   other_door: {fileID: 0}
+  last_on_path_opacity: 0
   inspect_indicator: {fileID: 0}
 --- !u!114 &8373090685380571641
 MonoBehaviour:

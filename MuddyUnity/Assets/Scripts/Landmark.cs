@@ -46,7 +46,7 @@ public class Landmark : MonoBehaviour
     }
 }
 
-public class CompareLanmarkPosition : IComparer
+public class CompareLandmarkPosition : IComparer
 {
     public int Compare(object x, object y)
     {
@@ -56,7 +56,7 @@ public class CompareLanmarkPosition : IComparer
     }
 }
 
-public class CompareLanmarkName : IComparer
+public class CompareLandmarkName : IComparer
 {
     public int Compare(object x, object y)
     {
@@ -117,12 +117,12 @@ public class CompareLandmarkEdgeofVisionPos : IComparer
     }
 }
 
-public class CompareLanmarkDistFromEdgeOfVision : IComparer
+public class CompareLandmarkDistFromEdgeOfVision : IComparer
 {
     float position;
     Path path;
 
-    public CompareLanmarkDistFromEdgeOfVision(float position, Path path)
+    public CompareLandmarkDistFromEdgeOfVision(float position, Path path)
     {
         this.position = position;
         this.path = path;
@@ -146,11 +146,11 @@ public class CompareLanmarkDistFromEdgeOfVision : IComparer
     }
 }
 
-public class CompareLanmarkDist : IComparer
+public class CompareLandmarkDist : IComparer
 {
     float position;
 
-    public CompareLanmarkDist(float position)
+    public CompareLandmarkDist(float position)
     {
         this.position = position;
     }
@@ -165,11 +165,11 @@ public class CompareLanmarkDist : IComparer
     }
 }
 
-public class CompareLanmarkVisibleDist : IComparer
+public class CompareLandmarkVisibleDist : IComparer
 {
     float position;
 
-    public CompareLanmarkVisibleDist(float position)
+    public CompareLandmarkVisibleDist(float position)
     {
         this.position = position;
     }
@@ -186,11 +186,11 @@ public class CompareLanmarkVisibleDist : IComparer
     }
 }
 
-public class CompareLanmarkVisiblePos : IComparer
+public class CompareLandmarkVisiblePos : IComparer
 {
     float position;
 
-    public CompareLanmarkVisiblePos(float position)
+    public CompareLandmarkVisiblePos(float position)
     {
         this.position = position;
     }
@@ -205,19 +205,29 @@ public class CompareLanmarkVisiblePos : IComparer
     }
 }
 
-public class CompareLanmarkVisibility : IComparer
+public class CompareLandmarkVisibility : IComparer
 {
     float position;
+    Path path;
 
-    public CompareLanmarkVisibility(float position)
+    public CompareLandmarkVisibility(float position, Path path)
     {
         this.position = position;
+        this.path = path;
     }
 
     public int Compare(object x, object y)
     {
         Landmark lm1 = (Landmark)x;
         Landmark lm2 = (Landmark)y;
+
+        Path p1 = lm1.GetPath();
+        Path p2 = lm2.GetPath();
+        if (p1 != p2)
+        {
+            return p1 == path ? -1 : p2 == path ? 1 : ((new CaseInsensitiveComparer()).Compare(p1.name, p2.name));
+        }
+
         float v1 = lm1.los == 0.0 ? 0.0f : 1.0f - Mathf.Abs(lm1.position - position) / lm1.los;
         float v2 = lm2.los == 0.0 ? 0.0f : 1.0f - Mathf.Abs(lm2.position - position) / lm2.los;
         return ((new CaseInsensitiveComparer()).Compare(v2, v1));

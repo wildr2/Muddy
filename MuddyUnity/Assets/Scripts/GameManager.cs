@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
     public Color highlight_color = Color.red;
 
     public float player_position;
+    public float target_player_position;
+    private float prev_input_move;
     private bool teleporting;
     private Path player_path;
     private Path prev_player_path;
@@ -62,54 +64,42 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        // Doors.
-        bool input_door = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Return);
-        Path[] paths = FindObjectsOfType<Path>();
-        if (input_door && inspected_lm && inspected_lm.other_door)
+        // Interaction.
+        bool input_interact = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Return);
+        if (input_interact && inspected_lm)
         {
-            prev_player_path = player_path;
-            player_path = inspected_lm.other_door.GetPath();
-            player_position = inspected_lm.other_door.position + (player_position - inspected_lm.position);
-            teleporting = true;
-            path_timestamp = Time.timeSinceLevelLoad;
-            inspected_lm.other_door.index = inspected_lm.index;
-            from_door = inspected_lm;
-            inspected_lm = null;
-            landmark_searcher.Reset();
+            if (inspected_lm.other_door)
+            {
+                prev_player_path = player_path;
+                player_path = inspected_lm.other_door.GetPath();
+                player_position = inspected_lm.other_door.position + (player_position - inspected_lm.position);
+                target_player_position = player_position;
+                teleporting = true;
+                path_timestamp = Time.timeSinceLevelLoad;
+                inspected_lm.other_door.index = inspected_lm.index;
+                from_door = inspected_lm;
+                inspected_lm = null;
+                landmark_searcher.Reset();
+            }
+            else
+            {
+                target_player_position = inspected_lm.position;
+                inspected_lm = null;
+            }
         }
 
         // Landmarks.
         Landmark[] landmarks = FindObjectsOfType<Landmark>();
-        Array.Sort(landmarks, new CompareLanmarkPosition());
-        List<Landmark> visible_landmarks = new List<Landmark>();
-        int closest_lm_index = -1;
-        float closest_lm_dist = float.MaxValue;
-        for (int i = 0; i < landmarks.Length; ++i)
-        {
-            float dist = Mathf.Abs(landmarks[i].position - player_position);
-            if (dist < closest_lm_dist)
-            {
-                closest_lm_index = i;
-                closest_lm_dist = dist;
-            }
-            if (dist < landmarks[i].los && landmarks[i].transform.parent == player_path.transform)
-            {
-                visible_landmarks.Add(landmarks[i]);
-            }
-        }
+        Array.Sort(landmarks, new ReverseComparer(new CompareLandmarkEdgeofVisionPos(player_position, player_path, false)));
 
-        Landmark[] visible_landmarks_by_vis = visible_landmarks.ToArray();
-        Array.Sort(visible_landmarks_by_vis, new CompareLanmarkVisibility(player_position));
-        Landmark[] visible_landmarks_by_eov = visible_landmarks.ToArray();
-        Array.Sort(visible_landmarks_by_eov, new CompareLanmarkDistFromEdgeOfVision(player_position, player_path));
-        Landmark[] visible_landmarks_by_index = visible_landmarks.ToArray();
+        Landmark[] visible_landmarks = landmarks.Where(lm => lm.GetPath() == player_path && Mathf.Abs(lm.position - player_position) < lm.los).ToArray();
+
+        Landmark[] visible_landmarks_by_vis = (Landmark[])visible_landmarks.Clone();
+        Array.Sort(visible_landmarks_by_vis, new CompareLandmarkVisibility(player_position, player_path));
+
+        Landmark[] visible_landmarks_by_index = (Landmark[])visible_landmarks.Clone();
         Array.Sort(visible_landmarks_by_index, new CompareLandmarkIndex());
 
-        Landmark closest_lm = closest_lm_index >= 0 ? landmarks[closest_lm_index] : null;
-        Landmark left_lm = closest_lm_index - 1 >= 0 ? landmarks[closest_lm_index - 1] : null;
-        Landmark right_lm = closest_lm_index + 1 < landmarks.Length ? landmarks[closest_lm_index + 1] : null;
-
-        Array.Sort(landmarks, new ReverseComparer(new CompareLandmarkEdgeofVisionPos(player_position, player_path, false)));
         Path path = null;
         int path_first_index = -1;
         for (int i = 0; i < landmarks.Length; ++i)
@@ -161,7 +151,8 @@ public class GameManager : MonoBehaviour
             Vector3 ui_pos = rt.localPosition;
             if (on_path)
             {
-                ui_pos.x = teleporting ? target_ui_pos.x : Mathf.Lerp(ui_pos.x, target_ui_pos.x, Time.deltaTime * landmark.x_lerp_speed);
+                float x_lerp_speed = 10;
+                ui_pos.x = teleporting ? target_ui_pos.x : Mathf.Lerp(ui_pos.x, target_ui_pos.x, Time.deltaTime * x_lerp_speed);
                 ui_pos.y = on_path ? target_ui_pos.y : ui_pos.y; // Mathf.Lerp(ui_pos.y, target_ui_pos.y, Time.deltaTime * landmark.y_lerp_speed);
                 rt.localPosition = ui_pos;
             }
@@ -195,9 +186,43 @@ public class GameManager : MonoBehaviour
         }
 
         // Movement.
-        float input_move = Input.GetAxis("Horizontal");
-        player_position += input_move * speed * Time.deltaTime;
-        player_position = Mathf.Clamp(player_position, player_path.left_wall_pos, player_path.right_wall_pos);
+        //float input_move = Input.GetAxis("Horizontal");
+        //player_position += input_move * speed * Time.deltaTime;
+        //player_position = Mathf.Clamp(player_position, player_path.left_wall_pos, player_path.right_wall_pos);
+        bool input_left = Input.GetKey(KeyCode.Comma);
+        bool input_right = Input.GetKey(KeyCode.Period);
+        int input_move = (input_left ? -1 : 0) + (input_right ? 1 : 0);
+        int move_dir = Mathf.Abs(target_player_position - player_position) > 0.1f ? (int)Mathf.Sign(target_player_position - player_position) : 0;
+        //if (input_move != 0 && input_move != move_dir)
+        //{
+        //    Landmark[] path_landmarks_by_dist = landmarks.Where(lm => lm.GetPath() == player_path).ToArray();
+        //    Array.Sort(path_landmarks_by_dist, new CompareLandmarkDist(player_position));
+        //    if (path_landmarks_by_dist.Length > 0)
+        //    {
+        //        Landmark closest_path_landmark = path_landmarks_by_dist[0];
+        //        Landmark[] path_landmarks_by_pos = (Landmark[])path_landmarks_by_dist.Clone();
+        //        Array.Sort(path_landmarks_by_pos, new CompareLandmarkPosition());
+
+        //        int closest_i = Array.FindIndex(path_landmarks_by_pos, (lm) => lm == closest_path_landmark);
+        //        Landmark target =
+        //            input_move < 0 && closest_i > 0 ? path_landmarks_by_pos[closest_i - 1] :
+        //            input_move > 0 && closest_i < path_landmarks_by_pos.Length - 1 ? path_landmarks_by_pos[closest_i + 1] : null;
+        //        if (target)
+        //        {
+        //            target_player_position = target.position;
+        //        }
+        //    }
+        //}
+        if (input_move != 0)
+        {
+            target_player_position = player_position + input_move * 100;
+        }
+        else if (prev_input_move != 0)
+        {
+            target_player_position = player_position;
+        }
+        prev_input_move = input_move;
+        player_position += Mathf.Clamp(target_player_position - player_position, -speed * Time.deltaTime, speed * Time.deltaTime);
 
         // Search.
         string input_search = Regex.Replace(Input.inputString, "[^A-Za-z0-9 -]", "");
@@ -212,7 +237,7 @@ public class GameManager : MonoBehaviour
         bool input_continue = Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.Return);
         bool input_shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-        if (input_inspect && visible_landmarks.Count > 0)
+        if (input_inspect && visible_landmarks.Length > 0)
         {
             int index = Array.FindIndex(visible_landmarks_by_index, x => x == inspected_lm);
             int dir = input_shift ? -1 : 1;
@@ -239,7 +264,12 @@ public class GameManager : MonoBehaviour
             narration_text.color = Color.Lerp(Color.clear, Color.white, 0.75f * narration_opacity);
         }
 
-        teleporting = false;
+        if (teleporting)
+        {
+            teleporting = false;
+            player_position = from_door.other_door.position;
+            target_player_position = player_position;
+        }
     }
 
     public int get_next_available_landmark_index(Landmark[] visible_landmarks_by_index)

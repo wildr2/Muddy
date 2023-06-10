@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Path : MonoBehaviour
 {
-    public const float wall_margin = 5.0f;
+    public const float wall_margin = 2.0f;
 
     public string description;
     public float left_wall_pos;

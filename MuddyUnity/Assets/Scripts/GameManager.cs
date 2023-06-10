@@ -66,6 +66,7 @@ public class GameManager : MonoBehaviour
     {
         // Interaction.
         bool input_interact = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Return);
+        bool interacted = false;
         if (input_interact && inspected_lm)
         {
             if (inspected_lm.other_door)
@@ -86,6 +87,7 @@ public class GameManager : MonoBehaviour
                 target_player_position = inspected_lm.position;
                 inspected_lm = null;
             }
+            interacted = true;
         }
 
         // Landmarks.
@@ -188,7 +190,6 @@ public class GameManager : MonoBehaviour
         // Movement.
         //float input_move = Input.GetAxis("Horizontal");
         //player_position += input_move * speed * Time.deltaTime;
-        //player_position = Mathf.Clamp(player_position, player_path.left_wall_pos, player_path.right_wall_pos);
         bool input_left = Input.GetKey(KeyCode.Comma);
         bool input_right = Input.GetKey(KeyCode.Period);
         int input_move = (input_left ? -1 : 0) + (input_right ? 1 : 0);
@@ -224,6 +225,9 @@ public class GameManager : MonoBehaviour
         prev_input_move = input_move;
         player_position += Mathf.Clamp(target_player_position - player_position, -speed * Time.deltaTime, speed * Time.deltaTime);
 
+        player_position = Mathf.Clamp(player_position, player_path.left_wall_pos, player_path.right_wall_pos);
+
+
         // Search.
         string input_search = Regex.Replace(Input.inputString, "[^A-Za-z0-9 -]", "");
         if (input_search.Length > 0)
@@ -244,9 +248,10 @@ public class GameManager : MonoBehaviour
             inspected_lm = index < 0 ? visible_landmarks_by_vis[0] : visible_landmarks_by_index[Mod(index + dir, visible_landmarks_by_index.Length)];
             landmark_searcher.Reset();
         }
-        else if (input_continue)
+        else if (input_continue && !interacted)
         {
             inspected_lm = null;
+            target_player_position = player_position;
         }
 
         // Narration.

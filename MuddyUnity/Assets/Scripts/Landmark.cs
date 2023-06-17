@@ -44,6 +44,29 @@ public class Landmark : MonoBehaviour
         }
         return false;
     }
+
+    public void SetText(string text0, string text1, float t)
+    {
+        Text text = transform.GetComponent<Text>();
+        if (t >= 1)
+        {
+            text.text = text1;
+        }
+        else
+        {
+            t = Mathf.Clamp01(t);
+            int n = Mathf.Max(text0.Length, text1.Length);
+            int x = Mathf.CeilToInt(Mathf.Lerp(0, n - 1, t));
+            string str = "";
+            for (int i = 0; i < n; ++i)
+            {
+                str += i >= x ? 
+                    (i < text0.Length ? text0[i].ToString() : "") :
+                    (i < text1.Length ? text1[i].ToString() : "");
+            }
+            text.text = str;
+        }
+    }
 }
 
 public class CompareLandmarkPosition : IComparer

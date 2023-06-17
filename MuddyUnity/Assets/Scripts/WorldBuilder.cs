@@ -81,7 +81,7 @@ public class WorldBuilder : MonoBehaviour
     {
         if (los >= 0)
         {
-            cur_landmark.los = los;
+            cur_landmark.los = (int)(los * 1.5f);
         }
         return this;
     }
@@ -119,7 +119,10 @@ public class WorldBuilder : MonoBehaviour
     {
         if (cur_landmark)
         {
-            cur_landmark.position = prev_landmark ? prev_landmark.position + Mathf.Max(prev_right_margin, cur_left_margin) : 0;
+            float margin = Mathf.Max(prev_right_margin, cur_left_margin);
+            float noise = 5 * Random.value;
+
+            cur_landmark.position = prev_landmark ? prev_landmark.position + (int)(margin + noise) : 0;
             prev_right_margin = cur_right_margin;
             cur_left_margin = 0;
             cur_right_margin = 0;

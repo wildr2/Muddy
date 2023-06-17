@@ -4,9 +4,15 @@ using UnityEngine;
 
 public class World : WorldBuilder
 {
+    public int world_id = 1;
+
     private void Awake()
     {
-        world1();
+        switch (world_id)
+        {
+            case 1: world1(); break;
+            case 2: world2(); break;
+        }
     }
 
     private void world1()
@@ -22,8 +28,32 @@ public class World : WorldBuilder
                 .desc("A crooked wooden barn.")
             .node("oak_tree", los: med)
                 .desc("An oak tree.")
+            .node("bridge", med, los: med)
+            .node("stream", los: med)
+            .node("under_the_bridge", los: med)
+                .door("road_stream")
+            .node("tree", med, los: med)
+            .node("oak tree", los: med)
+            .node("tree", los: med)
+            .node("stream", los: med)
+                .door("road_stream2")
             .node("tower", 70, los: far)
                 .desc("From a distance, the white tower of Schist peaks through distant clouds.")
+        .path("stream")
+            .node("smooth_pebble", los: near)
+            .node("red_fish", los: near)
+            .node("babbling", los: near)
+            .node("bridge", los: med)
+                .door("road_stream")
+            .node("cave", los: med)
+                .door("stream_cave")
+            .node("the_road", los: med)
+                .door("road_stream2")
+        .path("cave")
+            .node("dripping", los: near)
+            .node("darkness", los: near)
+            .node("outside", los: med)
+                .door("stream_cave")
         .path("workshop")
             .desc("Sunlight filters through the workshop's many grimy windows, dappling scattered wooden benches and overbearing spider plants.")
             .node("glass_jar", los: near)

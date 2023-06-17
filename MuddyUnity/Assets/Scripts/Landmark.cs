@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class Landmark : MonoBehaviour
 {
     public string name = "landmark";
-    public string description = "";
+    public List<LandmarkDesc> descriptions = new List<LandmarkDesc>();
     public int position = 0;
     public int los = 10;
     public string door_name;
@@ -26,6 +26,21 @@ public class Landmark : MonoBehaviour
     public Path GetPath()
     {
         return transform.GetComponentInParent<Path>();
+    }
+
+    public string GetDesc(float observe_pos)
+    {
+        float observe_dist = Mathf.Abs(position - observe_pos);
+        LandmarkDesc best_desc = null;
+        foreach (LandmarkDesc desc in descriptions) {
+            bool close_enough = desc.max_dist < 0 || observe_dist < desc.max_dist;
+            bool better_desc = best_desc == null || best_desc.max_dist < 0 || (desc.max_dist >= 0 && desc.max_dist < best_desc.max_dist);
+            if (close_enough && better_desc)
+            {
+                best_desc = desc;
+            }
+        }
+        return best_desc != null ? best_desc.text : "A landmark.";
     }
 
     public static bool Filter(Landmark landmark, string search_str)
@@ -67,6 +82,12 @@ public class Landmark : MonoBehaviour
             text.text = str;
         }
     }
+}
+
+public class LandmarkDesc
+{
+    public string text;
+    public float max_dist = -1;
 }
 
 public class CompareLandmarkPosition : IComparer

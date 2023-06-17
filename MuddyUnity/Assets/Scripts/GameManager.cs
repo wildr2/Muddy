@@ -292,8 +292,8 @@ public class GameManager : MonoBehaviour
         float narration_opacity = Mathf.Lerp(0.0f, 0.0f, path_out_t) + Mathf.Lerp(0.0f, 1.0f, path_in_t);
         if (inspected_lm)
         {
-            narration_text.text = inspected_lm.description + " >";
-            narration_text.color = Color.Lerp(Color.clear, Color.white, 1.0f * narration_opacity);
+            narration_text.text = inspected_lm.GetDesc(player_position) + " >";
+            narration_text.color = Color.Lerp(Color.clear, Color.white, 0.75f * narration_opacity);
         }
         else
         {

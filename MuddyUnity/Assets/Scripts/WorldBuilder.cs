@@ -63,11 +63,16 @@ public class WorldBuilder : MonoBehaviour
         return this;
     }
 
-    public WorldBuilder desc(string text)
+    public WorldBuilder desc(string text, float dist=-1)
     {
         if (cur_landmark)
         {
-            cur_landmark.description = text;
+            LandmarkDesc desc = new LandmarkDesc
+            {
+                text = text,
+                max_dist = dist,
+            };
+            cur_landmark.descriptions.Add(desc);
         }
         else if (cur_path)
         {

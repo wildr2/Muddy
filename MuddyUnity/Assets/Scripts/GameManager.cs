@@ -86,7 +86,6 @@ public class GameManager : MonoBehaviour
                 RectTransform to_door_rt = from_door.other_door.GetComponent<RectTransform>();
                 to_door_rt.localPosition = from_door_rt.localPosition;
                 inspected_lm = null;
-                landmark_searcher.Reset();
             }
             else
             {
@@ -94,6 +93,7 @@ public class GameManager : MonoBehaviour
                 //player_position = target_player_position;
                 inspected_lm = null;
             }
+            landmark_searcher.Reset();
             interacted = true;
         }
 

@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class Landmark : MonoBehaviour
 {
-    public string name = "landmark";
     public List<LandmarkDesc> descriptions = new List<LandmarkDesc>();
     public int position = 0;
     public int los = 10;

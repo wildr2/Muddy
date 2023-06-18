@@ -214,12 +214,12 @@ PrefabInstance:
     - target: {fileID: 1918029025527152032, guid: 985262ece8bdba941b40ef0a4e1efd1d,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: -1200
+      value: 700
       objectReference: {fileID: 0}
     - target: {fileID: 1918029025527152032, guid: 985262ece8bdba941b40ef0a4e1efd1d,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -600
+      value: 350
       objectReference: {fileID: 0}
     - target: {fileID: 1918029025527152047, guid: 985262ece8bdba941b40ef0a4e1efd1d,
         type: 3}
@@ -483,11 +483,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6258048929999699059, guid: 8bc25054b7a12e44097a54911fe51fe7,
         type: 3}
-      propertyPath: speed
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 6258048929999699059, guid: 8bc25054b7a12e44097a54911fe51fe7,
-        type: 3}
       propertyPath: landmarks_obj
       value: 
       objectReference: {fileID: 2404250551468396006}
@@ -496,6 +491,11 @@ PrefabInstance:
       propertyPath: narration_text
       value: 
       objectReference: {fileID: 5349021869697323822}
+    - target: {fileID: 6258048929999699059, guid: 8bc25054b7a12e44097a54911fe51fe7,
+        type: 3}
+      propertyPath: target_player_position
+      value: 11.3
+      objectReference: {fileID: 0}
     - target: {fileID: 6258048929999699060, guid: 8bc25054b7a12e44097a54911fe51fe7,
         type: 3}
       propertyPath: m_Name

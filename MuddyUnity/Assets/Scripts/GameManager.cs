@@ -19,10 +19,10 @@ public class GameManager : MonoBehaviour
     public float max_dist = 100.0f;
     public Color highlight_color = Color.red;
 
+    private WorldBuilder world_builder;
     public float player_position;
     public float target_player_position;
     private float prev_input_move;
-    private bool teleporting;
     private Path player_path;
     private Path prev_player_path;
     private Landmark inspected_lm;
@@ -35,32 +35,13 @@ public class GameManager : MonoBehaviour
     {
         landmark_searcher = new Searcher<Landmark>(Landmark.Filter);
 
+        world_builder = FindObjectOfType<WorldBuilder>();
+        world_builder.UpdateWorld();
+
         Path[] paths = FindObjectsOfType<Path>();
         player_path = Array.Find(paths, (path) => path.name == initial_path);
         player_path = player_path ? player_path : paths[0];
-
-        SetupLandmarks();
-    }
-
-    private void SetupLandmarks()
-    {
-        Landmark[] landmarks = FindObjectsOfType<Landmark>();
-        for (int i = 0; i < landmarks.Length; ++i)
-        {
-            Landmark lm = landmarks[i];
-            if (lm.door_name != "")
-            {
-                for (int j = i + 1; j < landmarks.Length; ++j)
-                {
-                    Landmark lm2 = landmarks[j];
-                    if (lm.door_name == lm2.door_name)
-                    {
-                        lm.other_door = lm2;
-                        lm2.other_door = lm;
-                    }
-                }
-            }
-        }
+        player_path.UpdateWallPosition(player_position);
     }
 
     private void Update()
@@ -70,29 +51,33 @@ public class GameManager : MonoBehaviour
         bool interacted = false;
         if (input_interact && inspected_lm)
         {
+            if (inspected_lm.action != null && inspected_lm.action.action != null)
+            {
+                inspected_lm.action.action(world_builder.state);
+            }
+
             if (inspected_lm.other_door)
             {
                 prev_player_path = player_path;
                 player_path = inspected_lm.other_door.GetPath();
-                //player_position = inspected_lm.other_door.position + (player_position - inspected_lm.position);
-                //target_player_position = player_position;
                 player_position = inspected_lm.other_door.position;
                 target_player_position = inspected_lm.other_door.position;
-                //teleporting = true;
                 path_timestamp = Time.timeSinceLevelLoad;
                 inspected_lm.other_door.index = inspected_lm.index;
                 from_door = inspected_lm;
                 RectTransform from_door_rt = from_door.GetComponent<RectTransform>();
                 RectTransform to_door_rt = from_door.other_door.GetComponent<RectTransform>();
                 to_door_rt.localPosition = from_door_rt.localPosition;
-                inspected_lm = null;
             }
-            else
+            else if (inspected_lm.action == null)
             {
-                target_player_position = inspected_lm.position;
-                //player_position = target_player_position;
-                inspected_lm = null;
+                //target_player_position = inspected_lm.position;
             }
+
+            inspected_lm = null;
+            world_builder.UpdateWorld();
+            player_path.UpdateWallPosition(player_position);
+            
             landmark_searcher.Reset();
             interacted = true;
         }
@@ -161,17 +146,15 @@ public class GameManager : MonoBehaviour
             Vector3 target_ui_pos = new Vector3();
             int row = path_row;
             target_ui_pos.x = distance_curve.Evaluate(Mathf.Clamp01(dist / max_dist)) * Mathf.Sign(dif) * max_ui_pos;
-            target_ui_pos.y = (landmarks.Length - 1 - landmark.index) * 35.0f;
+            target_ui_pos.y = landmark.index * -35.0f;
              
             Vector3 ui_pos = rt.localPosition;
             if (on_path)
             {
-                float x_lerp_speed = 4; // 10
-                float target_x = teleporting ? target_ui_pos.x : Mathf.Lerp(ui_pos.x, target_ui_pos.x, Time.deltaTime * x_lerp_speed);
-                //float to_target_x = target_x - ui_pos.x;
-                //ui_pos.x = ui_pos.x + Mathf.Sign(to_target_x) * Mathf.Min(Mathf.Abs(to_target_x), 1000 * Time.deltaTime);
-                ui_pos.x = target_x;
-                ui_pos.y = on_path ? target_ui_pos.y : ui_pos.y; // Mathf.Lerp(ui_pos.y, target_ui_pos.y, Time.deltaTime * landmark.y_lerp_speed);
+                float x_lerp_speed = 4;
+                bool instant = landmark.created_time == Time.time;
+                ui_pos.x = instant ? target_ui_pos.x : Mathf.Lerp(ui_pos.x, target_ui_pos.x, Time.deltaTime * x_lerp_speed);
+                ui_pos.y = on_path ? target_ui_pos.y : ui_pos.y;
                 rt.localPosition = ui_pos;
             }
 
@@ -180,7 +163,7 @@ public class GameManager : MonoBehaviour
             {
                 float on_path_opacity = landmark.los == 0 ? 0.0f : Mathf.Clamp01(1.0f - Mathf.Pow(dist / landmark.los, 2.0f));
                 float t = is_to_door ?
-                    1.0f : // (Time.timeSinceLevelLoad - path_timestamp) * 2.0f:
+                    1.0f :
                     (Time.timeSinceLevelLoad - path_timestamp - 0.5f) * 2.0f;
                 color.a = Mathf.Lerp(on_path_opacity - 1.0f, on_path_opacity, t);
                 if (debug_elf_eyes)
@@ -192,7 +175,7 @@ public class GameManager : MonoBehaviour
             else if (on_prev_path)
             {
                 float t = is_from_door ?
-                    1.0f : // (Time.timeSinceLevelLoad - path_timestamp) * 2.0f :
+                    1.0f :
                     (Time.timeSinceLevelLoad - path_timestamp) * 2.0f;
                 color.a = Mathf.Lerp(landmark.last_on_path_opacity, landmark.last_on_path_opacity - 1.0f, t);
             }
@@ -204,41 +187,11 @@ public class GameManager : MonoBehaviour
         }
 
         // Movement.
-        //bool input_left = Input.GetKey(KeyCode.Comma);
-        //bool input_right = Input.GetKey(KeyCode.Period);
-        bool input_left = Input.GetKey(KeyCode.J) && !Input.GetKey(KeyCode.LeftShift);
-        bool input_right = Input.GetKey(KeyCode.L) && !Input.GetKey(KeyCode.LeftShift);
+        bool input_shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool input_left = Input.GetKey(KeyCode.J) && !input_shift;
+        bool input_right = Input.GetKey(KeyCode.L) && !input_shift;
         int input_move = (input_left ? -1 : 0) + (input_right ? 1 : 0);
         int move_dir = Mathf.Abs(target_player_position - player_position) > 0.1f ? (int)Mathf.Sign(target_player_position - player_position) : 0;
-
-        bool input_step_left = Input.GetKey(KeyCode.J) && !Input.GetKey(KeyCode.LeftShift);
-        bool input_step_right = Input.GetKey(KeyCode.L) && !Input.GetKey(KeyCode.LeftShift);
-        int input_step = (input_step_left ? -1 : 0) + (input_step_right ? 1 : 0);
-        input_step = 0;
-
-        if (input_step != 0 && Time.time - step_time > 0.25f)
-        {
-            Landmark[] path_landmarks_by_dist = landmarks.Where(lm => lm.GetPath() == player_path).ToArray();
-            Array.Sort(path_landmarks_by_dist, new CompareLandmarkDist(player_position));
-            if (path_landmarks_by_dist.Length > 0)
-            {
-                Landmark closest_path_landmark = path_landmarks_by_dist[0];
-                Landmark[] path_landmarks_by_pos = (Landmark[])path_landmarks_by_dist.Clone();
-                Array.Sort(path_landmarks_by_pos, new CompareLandmarkPosition());
-
-                int closest_i = Array.FindIndex(path_landmarks_by_pos, (lm) => lm == closest_path_landmark);
-                Landmark target =
-                    input_step < 0 && closest_i > 0 ? path_landmarks_by_pos[closest_i - 1] :
-                    input_step > 0 && closest_i < path_landmarks_by_pos.Length - 1 ? path_landmarks_by_pos[closest_i + 1] : null;
-                if (target)
-                {
-                    target_player_position = target.position;
-                    //player_position = target_player_position; // maybe
-                    inspected_lm = target;
-                    step_time = Time.time;
-                }
-            }
-        }
 
         if (input_move != 0)
         {
@@ -255,23 +208,25 @@ public class GameManager : MonoBehaviour
 
 
         // Search.
-        string input_search = Regex.Replace(Input.inputString, "[^A-Za-z0-9 -]", "").ToLower();
-        if (input_search.Length > 0 && (input_move == 0 || (input_search != "j" && input_search != "l")))
+        string input_search = Regex.Replace(Input.inputString, "[^A-Za-z0-9 -]", "");
+        if (input_search == "j" || input_search == "l")
+        {
+            input_search = "";
+        }
+        if (input_search == "J" || input_search == "L")
+        {
+            input_search = input_search.ToLower();
+        }
+        if (input_search.Length > 0)
         {
             Landmark old_inspected_lm = inspected_lm;
             landmark_searcher.Update(input_search, visible_landmarks_by_vis);
             inspected_lm = landmark_searcher.IsFound() ? landmark_searcher.last_found_item : null;
-            if (inspected_lm && inspected_lm != old_inspected_lm)
-            {
-                //target_player_position = inspected_lm.position;
-                //player_position = target_player_position; // maybe
-            }
         }
 
         // Selection.
         bool input_inspect = Input.GetKeyDown(KeyCode.Slash);
         bool input_continue = Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.Return);
-        bool input_shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         if (input_inspect && visible_landmarks.Length > 0)
         {
@@ -299,13 +254,6 @@ public class GameManager : MonoBehaviour
         {
             narration_text.text = path_in_t > 0.0f ? player_path.description : prev_player_path ? prev_player_path.description : "";
             narration_text.color = Color.Lerp(Color.clear, Color.white, 0.75f * narration_opacity);
-        }
-
-        if (teleporting)
-        {
-            teleporting = false;
-            player_position = from_door.other_door.position;
-            target_player_position = player_position;
         }
     }
 

@@ -6,20 +6,37 @@ using UnityEngine.UI;
 public class Landmark : MonoBehaviour
 {
     public List<LandmarkDesc> descriptions = new List<LandmarkDesc>();
-    public int position = 0;
-    public int los = 10;
+    public LandmarkAction action;
+    public int position;
+    public int los;
     public string door_name;
+    public bool is_wall;
     public float x_lerp_speed = 10.0f; 
     public float y_lerp_speed = 2.0f;
     public int index = -1;
     public Landmark other_door;
     public float last_on_path_opacity;
+    public int reference_count;
+    public float created_time;
 
     public Text inspect_indicator;
 
     private void Awake()
     {
         inspect_indicator = transform.GetChild(0).GetComponent<Text>();
+        created_time = Time.time;
+    }
+
+    public void PreRebuild()
+    {
+        door_name = "";
+        other_door = null;
+        is_wall = false;
+        los = 0;
+        position = 0;
+        action = null;
+        descriptions.Clear();
+        reference_count = 0;
     }
 
     public Path GetPath()
@@ -86,6 +103,12 @@ public class Landmark : MonoBehaviour
 public class LandmarkDesc
 {
     public string text;
+    public float max_dist = -1;
+}
+
+public class LandmarkAction
+{
+    public System.Action<WorldState> action;
     public float max_dist = -1;
 }
 

@@ -4,24 +4,12 @@ using UnityEngine;
 
 public class World : WorldBuilder
 {
-    public int world_id = 1;
-
-    private void Awake()
-    {
-        switch (world_id)
-        {
-            case 1: world1(); break;
-            case 2: world2(); break;
-        }
-    }
-
-    private void world1()
+    protected override void Build()
     {
         begin()
 
         .path("road")
             .desc("The road.")
-            //.desc("It's hot and windy outside the workshop.")
             .node("bay_doors", los: nearish)
                 .door("road_workshop")
                 .desc("They're shut. Light creeps between them.")
@@ -32,32 +20,61 @@ public class World : WorldBuilder
             .node("bridge", med, los: med)
             .node("stream", los: med)
             .node("jump", los: med)
-                .door("road_stream")
-                .desc("Jump down to the stream under the bridge.")
+                .desc("That seems dangerous, it's a long way down.")
+                .cond((state) => { return state["parachute_taken"]; })
+                    .door("road_stream")
+                    .desc("Ready the parachute.")
+                .end_cond()
+            .node("gate", 0, 0, los: med)
+                .cond((state) => { return !state["gate_opened"]; })
+                    .desc("A sturdy iron gate. It's locked.")
+                    .wall()
+                    .act(action: (state) => { state["gate_opened"] = state["key_taken"]; })
+                .end_cond()
+                .cond((state) => { return state["gate_opened"]; })
+                    .desc("A sturdy iron gate. It's open.")
+                .end_cond()
             .node("tree", med, los: med)
             .node("oak tree", los: med)
-            .node("tree", los: med)
-            .node("stream", los: med)
+            .node("tree#2", los: med)
+            .node("stream#2", los: med)
                 .door("road_stream2")
-            .node("tower", 70, los: far)
+            .node("gate#2", 0, 0, los: nearish)
+                .cond((state) => { return !state["gate2_opened"]; })
+                    .desc("A sturdy iron gate. It's locked.")
+                    .wall()
+                    .act(action: (state) => { state["gate2_opened"] = state["key_taken"]; })
+                .end_cond()
+                .cond((state) => { return state["gate2_opened"]; })
+                    .desc("A sturdy iron gate. It's open.")
+                .end_cond()
+            .node("tree#3", 60, los: med)
+            .node("tower", los: far)
                 .desc("The white tower peaks through distant clouds.", dist: -1)
                 .desc("The white tower looms.", dist: med)
+                .desc("YOU WIN!!!", dist: nearish)
+            .node("tree#4", los: med)
         .path("stream")
             .desc("The stream.")
             .node("smooth_pebble", los: near)
             .node("red_fish", los: near)
-            .node("babbling", vnear, 0, los: near)
+            .node("babbling", rmargin: 0, los: near)
             .node("", 0, 0, los: med)
                 .door("road_stream")
-            .node("bridge", 0, vnear, los: med)
+            .node("bridge", lmargin: 0, los: med)
                 .desc("I can't easily climb up to the bridge from here.")
-            .node("cave", los: med)
+            .node("cave", med, los: med)
                 .door("stream_cave")
-            .node("the_road", los: med)
+            .node("the_road", lmargin: nearish, los: med)
                 .door("road_stream2")
         .path("cave")
             .desc("The cave.")
             .node("dripping", los: near)
+            .cond((state) => { return !state["key_taken"]; })
+                .node("key", los: vnear)
+                    .desc("The skeleton key!")
+                    .act(action: (state) => { state["key_taken"] = 1; })
+            .end_cond()
             .node("darkness", los: near)
             .node("outside", los: med)
                 .door("stream_cave")
@@ -84,30 +101,13 @@ public class World : WorldBuilder
                 .door("workshop_attic")
             .node("crate", los: nearish)
                 .desc("A dusty wooden crate.")
+                .act(action: (state) => { state["crate_opened"] = 1; })
 
-        .end();
-    }
-
-    private void world2()
-    {
-        begin()
-
-        .path("road")
-            .node("jump", med, los: nearish)
-                .door("jump_river")
-            .node("bridge", near, los: farish)
-            .node("stairs", near, los: nearish)
-                .door("bridge_river")
-            .node("tree", med, los: med)
-            .node("tower", 70, los: far)
-        .path("river")
-            .node("fish", near, los: nearish)
-            .node("")
-                .door("jump_river")
-            .node("rock", near, los: nearish)
-            .node("cave", near, los: nearish)
-            .node("stairs", near, los: nearish)
-                .door("bridge_river")
+            .cond((state) => { return state["crate_opened"] && !state["parachute_taken"]; })
+                .node("parachute", los: nearish)
+                    .desc("A parachute.")
+                    .act(action: (state) => { state["parachute_taken"] = 1; })
+            .end_cond()
 
         .end();
     }

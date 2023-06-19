@@ -15,6 +15,7 @@ public class WorldBuilder : MonoBehaviour
 
     public Path path_prefab;
     public Landmark landmark_prefab;
+    public Color highlight_color;
 
     private Path cur_path;
     private Landmark prev_landmark;
@@ -149,6 +150,18 @@ public class WorldBuilder : MonoBehaviour
         return this;
     }
 
+    public WorldBuilder else_cond()
+    {
+        cond_stack.Push(CheckCond());
+        return this;
+    }
+
+    public WorldBuilder else_cond(Func<WorldState, bool> func)
+    {
+        cond_stack.Push(CheckCond());
+        return this;
+    }
+
     public WorldBuilder end_cond()
     {
         cond_stack.Pop();
@@ -160,9 +173,12 @@ public class WorldBuilder : MonoBehaviour
         if (!CheckCond()) { return this; }
         if (cur_landmark)
         {
+            string formatted_text = Regex.Replace(text, @"~(.*)~", String.Format("<color=#{0}>$1</color>", ColorToHex(highlight_color)));
+            formatted_text = Regex.Replace(formatted_text, @"\*(.*)\*", "<b>$1</b>");
+
             LandmarkDesc desc = new LandmarkDesc
             {
-                text = text,
+                text = formatted_text,
                 max_dist = dist,
             };
             cur_landmark.descriptions.Add(desc);
@@ -260,5 +276,12 @@ public class WorldBuilder : MonoBehaviour
             cur_left_margin = 0;
             cur_right_margin = 0;
         }
+    }
+
+    // Note that Color32 and Color implicitly convert to each other. You may pass a Color object to this method without first casting it.
+    public static string ColorToHex(Color32 color)
+    {
+        string hex = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2");
+        return hex;
     }
 }
